@@ -4,6 +4,6 @@ manifest_version = 1
 name = "Yummy"
 id = "yummy_toasts"
 description = "A breadcord fun module."
-version = "1.0.0"
+version = "0.0.2"
 license = "GNU GPLv3"
 authors = ["Fripe"]

@@ -60,8 +60,8 @@ class Yummy(breadcord.module.ModuleCog):
             value, max_value = 1, value
         await ctx.reply(f"Rolled a {random.randint(value, max_value)}! 🎲")
 
-    @commands.hybrid_command(description='Roll a die using dice notation')
-    async def dnd_dice(self, ctx: commands.Context, *, dice_type: str):
+    @commands.hybrid_command(description="Evaluate a math expression with support for dice notation")
+    async def calc(self, ctx: commands.Context, *, dice_type: str):
         """
         Example of dice notation: "1d2", "1d20", "5d10", "1d20 - 2d6", "5d8 * 1d5".
         See https://en.wikipedia.org/wiki/Dice_notation for more information

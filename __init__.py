@@ -6,7 +6,6 @@ from typing import Any
 
 import discord
 from discord.ext import commands
-from discord import app_commands
 
 import breadcord
 
@@ -77,7 +76,6 @@ class Yummy(breadcord.module.ModuleCog):
         math_expr = re.sub(f"[^0-9{accepted_math_operations}]", "", "".join(map(str, dice)))
 
         try:
-            print(math_expr)
             out = eval_math(math_expr)
         except Exception as error:
             await ctx.reply(f"Could not evaluate.\n{discord.utils.escape_markdown(str(error))}")

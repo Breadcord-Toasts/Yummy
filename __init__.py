@@ -1,7 +1,10 @@
+import base64
+import math
 import random
 import re
 import ast
 import operator
+import string
 from typing import Any
 
 import discord
@@ -94,12 +97,30 @@ class Yummy(breadcord.module.ModuleCog):
                 raise error
 
     @commands.hybrid_command(description="Flips a coin")
-    async def coinflip(self, ctx: discord.Context):
+    async def coinflip(self, ctx: commands.Context):
         await ctx.reply(random.choice(("Heads", "Tails")))
 
-    @commands.hybrid_command(descriptions="Generates a fake IP adress")
-    async def ip(self, ctx: discord.Context):
+    @commands.hybrid_command(descriptions="Generates a fake IP address")
+    async def ip(self, ctx: commands.Context):
         await ctx.reply(".".join(str(random.randint(0, 255)) for _ in range(4)))
+
+    @commands.hybrid_command(description="Generates a fake discord token")
+    async def token(self, ctx: commands.Context):
+        # Taken from https://github.com/Fripe070/FripeBot/blob/4d99df8a01bdacf970c552b3812e221a9a3070a8/cogs/fun.py#L261
+        # I stole that code from somewhere else, but I can't remember where from
+        def random_string(length=0, key=string.ascii_letters + string.digits + "-_"):
+            return "".join(random.choice(key) for _ in range(length))
+
+        if random.random() < 0.15:
+            await ctx.reply(f"mfa.{random_string(math.floor(random.random() * (68 - 20)) + 20)}")
+            return
+
+        token_id = random_string(18, "0123456789").encode("ascii")
+        encoded_id = base64.b64encode(bytes(token_id)).decode("utf-8")
+        timestamp = random_string(math.floor(random.random() * (7 - 6) + 6))
+        hmac = random_string(27)
+        await ctx.reply(f"{encoded_id}.{timestamp}.{hmac}")
+
 
 
 async def setup(bot: breadcord.Bot):

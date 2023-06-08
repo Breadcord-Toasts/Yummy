@@ -93,6 +93,14 @@ class Yummy(breadcord.module.ModuleCog):
                     return
                 raise error
 
+    @commands.hybrid_command(description="Flips a coin")
+    async def coinflip(self, ctx: discord.Context):
+        await ctx.reply(random.choice(("Heads", "Tails")))
+
+    @commands.hybrid_command(descriptions="Generates a fake IP adress")
+    async def ip(self, ctx: discord.Context):
+        await ctx.reply(".".join(str(random.randint(0, 255)) for _ in range(4)))
+
 
 async def setup(bot: breadcord.Bot):
     await bot.add_cog(Yummy("yummy_toasts"))

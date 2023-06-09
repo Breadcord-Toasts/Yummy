@@ -138,13 +138,17 @@ class Yummy(breadcord.module.ModuleCog):
             new_string += char.upper() if i % 2 == 0 else char.lower()
         await ctx.reply(new_string)
 
-    @string_formatting_group.command(description="Scrambles the order of characters in the input text")
+
+    @string_formatting_group.command(
+        description="Scrambles the order of characters in the input text",
+        aliases=["shuffle"]
+    )
     async def scramble(self, ctx: commands.Context, *, text: str):
         await ctx.reply("".join(random.sample(text, k=len(text))))
 
     @string_formatting_group.command(
         description="Scrambles the order of words in the input text",
-        aliases=["scramblewords"]
+        aliases=["scramblewords", "shuffle_words", "shufflewords"]
     )
     async def scramble_words(self, ctx: commands.Context, *, text: str):
         words = text.split(" ")

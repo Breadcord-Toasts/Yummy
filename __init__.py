@@ -121,6 +121,21 @@ class Yummy(breadcord.module.ModuleCog):
         hmac = random_string(27)
         await ctx.reply(f"{encoded_id}.{timestamp}.{hmac}")
 
+    @commands.hybrid_group(name="text", description="Various text modification commands")
+    async def string_formatting_group(self, ctx: commands.Context) -> None:
+        await ctx.send_help(ctx.command)
+
+    @string_formatting_group.command(description="VaRiEs ThE cApItAlIsAtIoN oF iNpUtEd TeXt")
+    async def varied(self, ctx: commands.Context, *, text: str):
+        new_string = ""
+        i = random.randint(0, 1)
+        for char in text:
+            if char.upper() == char and char.lower() == char:
+                new_string += char
+                continue
+            i += 1
+            new_string += char.upper() if i % 2 == 0 else char.lower()
+        await ctx.reply(new_string)
 
 
 async def setup(bot: breadcord.Bot):

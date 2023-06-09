@@ -125,7 +125,7 @@ class Yummy(breadcord.module.ModuleCog):
     async def string_formatting_group(self, ctx: commands.Context) -> None:
         await ctx.send_help(ctx.command)
 
-    @string_formatting_group.command(description="VaRiEs ThE cApItAlIsAtIoN oF iNpUtEd TeXt")
+    @string_formatting_group.command(description="VaRiEs ThE cApItAlIsAtIoN oF iNpUt TeXt")
     async def varied(self, ctx: commands.Context, *, text: str):
         new_string = ""
         i = random.randint(0, 1)
@@ -136,6 +136,18 @@ class Yummy(breadcord.module.ModuleCog):
             i += 1
             new_string += char.upper() if i % 2 == 0 else char.lower()
         await ctx.reply(new_string)
+
+    @string_formatting_group.command(description="Scrambles the order of letters in the input text")
+    async def scramble(self, ctx: commands.Context, *, text: str):
+        await ctx.reply("".join(random.sample(text, k=len(text))))
+
+    @string_formatting_group.command(
+        description="Scrambles the order of words in the input text",
+        aliases=["scramblewords"]
+    )
+    async def scramble_words(self, ctx: commands.Context, *, text: str):
+        words = text.split(" ")
+        await ctx.reply(" ".join(random.sample(words, k=len(words))))
 
 
 async def setup(bot: breadcord.Bot):

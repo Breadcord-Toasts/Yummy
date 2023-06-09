@@ -9,6 +9,7 @@ from typing import Any
 
 import discord
 from discord.ext import commands
+import uwuify
 
 import breadcord
 
@@ -137,7 +138,7 @@ class Yummy(breadcord.module.ModuleCog):
             new_string += char.upper() if i % 2 == 0 else char.lower()
         await ctx.reply(new_string)
 
-    @string_formatting_group.command(description="Scrambles the order of letters in the input text")
+    @string_formatting_group.command(description="Scrambles the order of characters in the input text")
     async def scramble(self, ctx: commands.Context, *, text: str):
         await ctx.reply("".join(random.sample(text, k=len(text))))
 
@@ -148,6 +149,30 @@ class Yummy(breadcord.module.ModuleCog):
     async def scramble_words(self, ctx: commands.Context, *, text: str):
         words = text.split(" ")
         await ctx.reply(" ".join(random.sample(words, k=len(words))))
+
+    @string_formatting_group.command(
+        description="Reverses the order of characters in the input text",
+        aliases=["invert"]
+    )
+    async def reverse(self, ctx: commands.Context, *, text: str):
+        await ctx.reply(text[::-1])
+
+    @string_formatting_group.command(
+        description="Reverses the order of words in the input text",
+        aliases=["reversewords", "invert_words", "invertwords"]
+    )
+    async def reverse_words(self, ctx: commands.Context, *, text: str):
+        await ctx.reply(" ".join(text.split(" ")[::-1]))
+
+    @string_formatting_group.command(
+        description="Uwuifies the input text",
+        aliases=["owoify", "uwu", "owo"]
+    )
+    async def uwuify(self, ctx: commands.Context, *, text: str):
+        await ctx.reply(uwuify.uwu(
+            text,
+            flags=uwuify.YU | uwuify.STUTTER | uwuify.SMILEY
+        ))
 
 
 async def setup(bot: breadcord.Bot):

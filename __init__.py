@@ -37,13 +37,13 @@ def eval_math(expression: str) -> Any:
         ast.Mult: operator.mul,
         ast.Div: operator.truediv,
         ast.FloorDiv: operator.floordiv,
-        ast.Pow: limited_pow,
         ast.USub: operator.neg,
         ast.Mod: operator.mod,
+
+        ast.Pow: limited_pow,
+        ast.BitXor: limited_pow,  # ^
     }
 
-    # noinspection PyTypeChecker
-    # I'm sure it's finneee
     def eval_(node):
         if isinstance(node, ast.Num):  # <number>
             return node.n
@@ -66,19 +66,9 @@ class Yummy(breadcord.module.ModuleCog):
 
     @commands.command(description="Evaluate a math expression with support for dice notation")
     async def calc(self, ctx: commands.Context, *, user_input: str):
-        """
-        Example of dice notation: "1d2", "1d20", "5d10", "1d20 - 2d6", "5d8 * 1d5".
-        See https://en.wikipedia.org/wiki/Dice_notation for more information
-        """
-        accepted_math_operations = "+-/*)("
-
-        dice = map(
-            dice_to_num,
-            re.split(f"([{accepted_math_operations}])", user_input.lower().replace(" ", ""))
-        )
-        math_expr = re.sub(f"[^0-9{accepted_math_operations}]", "", "".join(map(str, dice)))
+        """Evaluates a math expression."""
         try:
-            out = eval_math(math_expr)
+            out = eval_math(user_input)
         except Exception as error:
             await ctx.reply(f"Could not evaluate.\n{discord.utils.escape_markdown(str(error))}")
             return
@@ -93,7 +83,7 @@ class Yummy(breadcord.module.ModuleCog):
                 if re.match(r"^Exceeds the limit \(\d+\) for integer string conversion", error.args[0]):
                     await ctx.reply("Output too large, could not send.")
                     return
-                raise error
+                raise
 
     @commands.hybrid_command(description="Flips a coin")
     async def coinflip(self, ctx: commands.Context):

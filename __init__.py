@@ -281,5 +281,5 @@ class Yummy(breadcord.module.ModuleCog):
         ))
 
 
-async def setup(bot: breadcord.Bot):
-    await bot.add_cog(Yummy("yummy_toasts"))
+async def setup(bot: breadcord.Bot, module: breadcord.module.Module) -> None:
+    await bot.add_cog(Yummy(module.id))

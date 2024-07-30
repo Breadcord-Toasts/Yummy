@@ -6,6 +6,7 @@ import random
 import re
 import string
 import warnings
+from collections.abc import Callable
 from typing import Any, Iterable
 
 import discord
@@ -15,10 +16,9 @@ from discord.ext import commands
 import breadcord
 
 
-def dice_to_num(dice_roll: str) -> int | str:
-    if not (match := re.match(r"^(?P<multiplier>\d*)d(?P<roll_max>\d+)", dice_roll)):
-        return dice_roll
-
+def dice_to_num(dice_roll: str) -> int | None:
+    if not (match := re.match(r"(?P<multiplier>\d*)d(?P<roll_max>\d+)", dice_roll, re.IGNORECASE | re.ASCII)):
+        return None
     roll_max = int(match["roll_max"])
     multiplier = int(match["multiplier"] or 1)
     return sum(random.randint(1, roll_max) for _ in range(multiplier))
@@ -32,7 +32,7 @@ def eval_math(expression: str) -> Any:
             raise ValueError("Too large for exponentiation.")
         return operator.pow(a, b)
 
-    operators = {
+    operators: dict[type[ast.AST], Any] = {
         ast.Add: operator.add,
         ast.Sub: operator.sub,
         ast.Mult: operator.mul,
@@ -44,23 +44,44 @@ def eval_math(expression: str) -> Any:
         ast.Pow: limited_pow,
         ast.BitXor: limited_pow,  # ^
     }
+    functions: dict[str, Callable[..., Any]] = {
+        "max": max,
+        "min": min,
+        "abs": abs,
+        "round": round,
+        "ceil": math.ceil,
+        "floor": math.floor,
+        "sqrt": math.sqrt,
+        "log": math.log,          "log10": math.log10, "log2": math.log2,
+        "sin": math.sin,          "cos": math.cos,     "tan": math.tan,
+        "asin": math.asin,        "acos": math.acos,   "atan": math.atan,   "atan2": math.atan2,
+        "degrees": math.degrees, "radians": math.radians,
+    }
 
-    def eval_(node):
-        if isinstance(node, ast.Num):  # <number>
-            return node.n
+    def eval_(node: ast.AST) -> Any:
+        if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
+            return node.value
         elif isinstance(node, ast.BinOp):  # <left> <operator> <right>
-            return operators[type(node.op)](eval_(node.left), eval_(node.right))  # type: ignore
+            return operators[type(node.op)](eval_(node.left), eval_(node.right))
         elif isinstance(node, ast.UnaryOp):  # <operator> <operand> e.g., -1
-            return operators[type(node.op)](eval_(node.operand))  # type: ignore
-        else:
-            raise TypeError(node)
+            return operators[type(node.op)](eval_(node.operand))
+        elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+            if not isinstance(node.func.ctx, ast.Load):
+                raise SyntaxError("Only function calls are allowed")
+            if (name := node.func.id) in functions:
+                return functions[name](*map(eval_, node.args))
+            raise NameError(f"Function {name!r} is not defined")
+        raise TypeError(f"Unsupported AST node: {node.__class__.__name__}")
 
-    return eval_(ast.parse(expression, mode='eval').body)
+    return eval_(ast.parse(expression, mode="eval").body)
 
 
 class Yummy(breadcord.module.ModuleCog):
 
-    @commands.hybrid_command(description='Roll a die with a min and max value')
+    @commands.hybrid_command(
+        edscription="Roll a die with a min and max value",
+        aliases=["roll"],
+    )
     async def dice(self, ctx: commands.Context, value: int = 6, max_value: int | None = None) -> None:
         if max_value is None:
             value, max_value = 1, value
@@ -81,7 +102,7 @@ class Yummy(breadcord.module.ModuleCog):
                     out = f"{out[:discord_message_limit - 3]}..."
                 await ctx.reply(out)
             except ValueError as error:
-                # In vase converting the number to a string fails due to its size
+                # In case converting the number to a string fails due to its size
                 if re.match(r"^Exceeds the limit \(\d+\) for integer string conversion", error.args[0]):
                     await ctx.reply("Output too large, could not send.")
                     return
